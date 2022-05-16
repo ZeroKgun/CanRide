@@ -19,7 +19,11 @@ import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
 import code from "./서울시 지하철역 정보 검색 (역명)";
 import axios from "axios";
 import haversine from "haversine-distance";
+import { LinearGradient } from "expo-linear-gradient";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+const Stack = createNativeStackNavigator();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const desc = [];
 let today = new Date();
@@ -31,7 +35,20 @@ let hours = ("0" + today.getHours()).slice(-2);
 let minutes = ("0" + today.getMinutes()).slice(-2);
 let seconds = ("0" + today.getSeconds()).slice(-2);
 
-const app = ({ navigation }) => {
+const HomeScreen = ({ navigation }) => {
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={["#42f5a1", "#42f58a", "#42f54e"]}
+        style={styles.background}
+      />
+      <Text style={styles.text}>탈수이써!</Text>
+      <Button title="타러 가자!" onPress={() => navigation.navigate("Map")} />
+    </View>
+  );
+};
+
+const MapScreen = ({ navigation }) => {
   const [initialRegion, setInitialRegion] = useState({
     latitude: 35.91395373474155,
     longitude: 127.73829440215488,
@@ -201,50 +218,7 @@ const app = ({ navigation }) => {
                 //longitude: marker.lng,
               }}
               onPress={() => {
-                var station_code = code.DATA;
-                var ccode = "";
-                for (var i = 0; i < station_code.length; i++) {
-                  if (station_code[i]["station_nm"] === marker.name) {
-                    ccode = station_code[i]["fr_code"];
-                  }
-                }
-                console.log("출발지 코드 : ", ccode);
-                Alert.alert(ccode);
-
-                const URL = `https://map.naver.com/v5/api/transit/directions/subway?start=${ccode}&goal=${destination}&departureTime=${year}-${month}-${date}T${hours}%3A${minutes}%3A${seconds}`;
-                const sta = "";
-                console.log(URL);
-                axios.get(URL).then((data) => {
-                  //console.log(data.data.paths[0].legs);
-                  //console.log(data.data);
-                  // console.log(data.data.paths[0].legs[0].steps.length);
-                  // console.log(data.data.paths[0].legs[0].steps[0].stations.length);
-                  // console.log(data.data.paths[0].legs[0].steps[1].stations.length);
-                  // console.log(data.data.paths[0].legs[0].steps[2].stations.length);
-                  let cnt = 0;
-                  for (
-                    var i = 0;
-                    i < data.data.paths[0].legs[0].steps.length;
-                    i = i + 2
-                  ) {
-                    console.log(
-                      data.data.paths[0].legs[0].steps[i].routes[0].name
-                    );
-                    for (
-                      var j = 0;
-                      j < data.data.paths[0].legs[0].steps[i].stations.length;
-                      j++
-                    ) {
-                      console.log(
-                        data.data.paths[0].legs[0].steps[i].stations[j].name
-                      );
-                      list[cnt] =
-                        data.data.paths[0].legs[0].steps[i].stations[j].name;
-                      cnt++;
-                    }
-                  }
-                  setRoute(list);
-                });
+                navigation.navigate("Details");
               }}
             ></Marker>
           );
@@ -253,6 +227,31 @@ const app = ({ navigation }) => {
     </Wrapper>
   );
 };
+
+const DetailsScreen = ({ navigation }) => {
+  return (
+    <Wrapper>
+      <View>
+        <Text>
+          여기에 이제 경로랑 택시 아이콘이랑 택시비를 알려주는 레전드를
+          보여줄꺼임
+        </Text>
+      </View>
+    </Wrapper>
+  );
+};
+
+function app() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Map" component={MapScreen} />
+        <Stack.Screen name="Details" component={DetailsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
 export default app;
 
